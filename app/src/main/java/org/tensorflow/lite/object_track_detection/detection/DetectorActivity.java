@@ -36,6 +36,7 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -53,6 +54,8 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.tensorflow.lite.object_track_detection.detection.customview.OverlayView;
 import org.tensorflow.lite.object_track_detection.detection.customview.OverlayView.DrawCallback;
@@ -581,16 +584,54 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                   if (location != null && result.getConfidence() >= minimumConfidence) {
                     canvas.drawRect(location, paint);
                     //>>>>>>First Trial Edit<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    if (result.getTitle().equals("cup")) //THIS WORKS!!!!
+                    if (result.getTitle().equals("cup") || result.getTitle().equals("bottle")) //THIS WORKS!!!!
                     {
                       cropToFrameTransform.mapRect(location);
-
                       result.setLocation(location);
                       mappedRecognitions.add(result);
+                      int locX = (int) location.bottom;
+                      int bufferReg = 40;
+                      //0 means turn left, 2 means turn right
+                      if (locX <= 325 - bufferReg)//turn left
+                      {
+                        try {
+                          mConnectedThread.write(0 + "");//turn left
+                        } catch (Exception e) {
+                        }
+                        Log.e("location", location + "");
+
+
+                      } else if (locX > 325 + bufferReg)//turn right
+                      {
+                        try {
+                          mConnectedThread.write(2 + "");//turn right
+                        } catch (Exception e) {
+                        }
+                        Log.e("location", location + "");
+                      }
+                      else
+                      {
+                        try {
+                          mConnectedThread.write(1 + "");//1 means go forward
+                        } catch (Exception e) {
+                        }
+                        Log.e("location", location + "");
+                      }
+                    }
+                  }
+                  //we might need a time delay here! we need to know if we are about to swoop it
+                  if(location == null)
+                  {
+                    //keep turning left for a bit, 3 will switch to turn operation
+                    try {
+                      mConnectedThread.write(3 + "");
+                    }
+                    catch(Exception e)
+                    {
+                      Log.e("mistake2", "bluetooth thread has an error");
                     }
                   }
                 }
-
                 tracker.trackResults(mappedRecognitions, currTimestamp);
                 trackingOverlay.postInvalidate();
 
