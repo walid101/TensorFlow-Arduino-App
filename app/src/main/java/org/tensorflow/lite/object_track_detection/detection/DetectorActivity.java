@@ -16,7 +16,7 @@
 
 package org.tensorflow.lite.object_track_detection.detection;
 //WE use mConnectedThread to write to bluetooth
-
+//WE use readBuffer to get info from bluetooth module
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -103,7 +103,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private BluetoothSocket mBTSocket = null; // bi-directional client-to-client data path
 
   private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
-
+  private boolean makeLandScape = false;
 
   // #defines for identifying shared types between calling functions
   private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
@@ -120,7 +120,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt";
   private static final DetectorMode MODE = DetectorMode.TF_OD_API;
   // Minimum detection confidence to track a detection.
-  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
+  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.40f;
   private static final boolean MAINTAIN_ASPECT = false;
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
   private static final boolean SAVE_PREVIEW_BITMAP = false;
@@ -203,6 +203,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         public void onClick(View v){
           if(mConnectedThread != null) //First check to make sure thread created
             mConnectedThread.write("1");
+          //change to landscape
+          makeLandScape = !makeLandScape;
         }
       });
 
@@ -589,22 +591,29 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                       cropToFrameTransform.mapRect(location);
                       result.setLocation(location);
                       mappedRecognitions.add(result);
-                      int locX = (int) location.bottom;
-                      int bufferReg = 40;
+                      int locX = (int)location.centerY();
+
+                      int bufferReg = 53;//used to be 40
+                      int adjustLeft = 20;
+                      if(makeLandScape)
+                      {
+                        locX = (int)location.centerX();
+
+                      }
                       //0 means turn left, 2 means turn right
-                      if (locX <= 325 - bufferReg)//turn left
+                      if (locX <= 325 - bufferReg)//turn right
                       {
                         try {
-                          mConnectedThread.write(0 + "");//turn left
+                          mConnectedThread.write(0 + "");//turn right
                         } catch (Exception e) {
                         }
                         Log.e("location", location + "");
 
 
-                      } else if (locX > 325 + bufferReg)//turn right
+                      } else if (locX > 325 + bufferReg)//turn left
                       {
                         try {
-                          mConnectedThread.write(2 + "");//turn right
+                          mConnectedThread.write(2 + "");//turn left
                         } catch (Exception e) {
                         }
                         Log.e("location", location + "");
@@ -620,7 +629,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     }
                   }
                   //we might need a time delay here! we need to know if we are about to swoop it
-                  if(location == null)
+                  /*we dont need this right now since we have distance sensors
+                  if(location == null || !(result.getTitle().equals("cup") || result.getTitle().equals("bottle")))
                   {
                     //keep turning left for a bit, 3 will switch to turn operation
                     try {
@@ -631,6 +641,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                       Log.e("mistake2", "bluetooth thread has an error");
                     }
                   }
+                  */
+
                 }
                 tracker.trackResults(mappedRecognitions, currTimestamp);
                 trackingOverlay.postInvalidate();

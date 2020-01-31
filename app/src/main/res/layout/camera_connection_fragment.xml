@@ -26,7 +26,7 @@
     <org.tensorflow.lite.object_track_detection.detection.customview.RecognitionScoreView
         android:id="@+id/results"
         android:layout_width="match_parent"
-        android:layout_height="112dp"
+        android:layout_height="180dp"
         android:layout_alignParentTop="true" />
 
     <org.tensorflow.lite.object_track_detection.detection.customview.OverlayView
