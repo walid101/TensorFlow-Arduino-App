@@ -28,7 +28,7 @@
 
         <activity
             android:name="org.tensorflow.lite.object_track_detection.detection.DetectorActivity"
-            android:label="@string/activity_name_detection"
+            android:label="AutoBot"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
