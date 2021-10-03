@@ -16,6 +16,8 @@ Using TensorFlow Lite and A thread based Bluetooth, this program easily communic
 Downloading, extraction and placing it in assets folder has been managed automatically by download.gradle.
 
 If you explicitly want to download the model, you can download from **[here](http://storage.googleapis.com/download.tensorflow.org/models/tflite/coco_ssd_mobilenet_v1_1.0_quant_2018_06_29.zip)**. Extract the zip to get the .tflite and label file.
+
+
 ![Image description](https://github.com/walid101/TensorFlow-Arduino-App/blob/master/R-CubedImageDetect.jpg)
 
 https://devpost.com/software/r-cubed-6twh1n
